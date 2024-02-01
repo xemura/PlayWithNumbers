@@ -6,8 +6,8 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.OnBackPressedCallback
-import androidx.fragment.app.FragmentManager
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.xenia.playwithnumbers.R
 import com.xenia.playwithnumbers.databinding.FragmentGameFinishedBinding
 import com.xenia.playwithnumbers.domain.entity.GameResult
@@ -15,7 +15,7 @@ import com.xenia.playwithnumbers.domain.entity.GameResult
 
 class GameFinishedFragment : Fragment() {
 
-    private lateinit var gameResult: GameResult
+    private val args by navArgs<GameFinishedFragmentArgs>()
 
     private var _binding: FragmentGameFinishedBinding? = null
     private val binding: FragmentGameFinishedBinding
@@ -23,21 +23,10 @@ class GameFinishedFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        parseArgs()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        requireActivity().onBackPressedDispatcher.addCallback(
-            viewLifecycleOwner,
-            object : OnBackPressedCallback(
-                true
-            ) {
-                override fun handleOnBackPressed() {
-                    retryGame()
-                }
-            })
 
         binding.buttonRetry.setOnClickListener {
             retryGame()
@@ -52,16 +41,16 @@ class GameFinishedFragment : Fragment() {
     }
 
     private fun getSmileResID(): Int {
-        return if (gameResult.winner) {
+        return if (args.gameResult.winner) {
             R.drawable.ic_smile
         } else R.drawable.ic_sad
     }
 
     private fun setScorePercentage(): String {
-        val rightAnswersPercent = if (gameResult.countOfQuestions == 0) {
+        val rightAnswersPercent = if (args.gameResult.countOfQuestions == 0) {
             0
         } else {
-            ((gameResult.countOfRightAnswers / gameResult.countOfQuestions.toDouble()) * 100).toInt()
+            ((args.gameResult.countOfRightAnswers / args.gameResult.countOfQuestions.toDouble()) * 100).toInt()
         }
 
         return String.format(
@@ -75,7 +64,7 @@ class GameFinishedFragment : Fragment() {
         return String.format(
             context?.resources?.getString(R.string.required_percentage)
                 ?: throw RuntimeException("Does not have this resource"),
-            gameResult.gameSettings.minPercentOfRightAnswers
+            args.gameResult.gameSettings.minPercentOfRightAnswers
         )
     }
 
@@ -83,7 +72,7 @@ class GameFinishedFragment : Fragment() {
         return String.format(
             context?.resources?.getString(R.string.score_answers)
                 ?: throw RuntimeException("Does not have this resource"),
-            gameResult.countOfRightAnswers
+            args.gameResult.countOfRightAnswers
         )
     }
 
@@ -92,19 +81,12 @@ class GameFinishedFragment : Fragment() {
         return String.format(
             context?.resources?.getString(R.string.required_score)
                 ?: throw RuntimeException("Does not have this resource"),
-            gameResult.gameSettings.minCountOfRightAnswers.toString()
+            args.gameResult.gameSettings.minCountOfRightAnswers.toString()
         )
     }
 
-    private fun parseArgs() {
-        requireArguments().getParcelable<GameResult>(GAME_RESULT)?.let {
-            gameResult = it
-        }
-        Log.d("GameFinishedFragment", gameResult.toString())
-    }
-
     private fun retryGame() {
-        requireActivity().supportFragmentManager.popBackStack(GameFragment.NAME, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+        findNavController().popBackStack()
     }
 
     override fun onCreateView(
@@ -118,19 +100,5 @@ class GameFinishedFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    companion object {
-
-        private const val GAME_RESULT = "result"
-
-        @JvmStatic
-        fun newInstance(gameResult: GameResult) : GameFinishedFragment{
-            return GameFinishedFragment().apply {
-                arguments = Bundle().apply {
-                    putParcelable(GAME_RESULT, gameResult)
-                }
-            }
-        }
     }
 }
