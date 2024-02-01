@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.FragmentManager
+import com.xenia.playwithnumbers.R
 import com.xenia.playwithnumbers.databinding.FragmentGameFinishedBinding
 import com.xenia.playwithnumbers.domain.entity.GameResult
 
@@ -41,6 +42,58 @@ class GameFinishedFragment : Fragment() {
         binding.buttonRetry.setOnClickListener {
             retryGame()
         }
+
+        binding.emojiResult.setImageResource(getSmileResID())
+
+        binding.tvRequiredAnswers.text = setRequiredAnswers()
+        binding.tvScoreAnswers.text = setScoreAnswers()
+        binding.tvRequiredPercentage.text = setRequiredPercentage()
+        binding.tvScorePercentage.text = setScorePercentage()
+    }
+
+    private fun getSmileResID(): Int {
+        return if (gameResult.winner) {
+            R.drawable.ic_smile
+        } else R.drawable.ic_sad
+    }
+
+    private fun setScorePercentage(): String {
+        val rightAnswersPercent = if (gameResult.countOfQuestions == 0) {
+            0
+        } else {
+            ((gameResult.countOfRightAnswers / gameResult.countOfQuestions.toDouble()) * 100).toInt()
+        }
+
+        return String.format(
+            context?.resources?.getString(R.string.score_percentage)
+                ?: throw RuntimeException("Does not have this resource"),
+            rightAnswersPercent.toString()
+        )
+    }
+
+    private fun setRequiredPercentage(): String {
+        return String.format(
+            context?.resources?.getString(R.string.required_percentage)
+                ?: throw RuntimeException("Does not have this resource"),
+            gameResult.gameSettings.minPercentOfRightAnswers
+        )
+    }
+
+    private fun setScoreAnswers(): String {
+        return String.format(
+            context?.resources?.getString(R.string.score_answers)
+                ?: throw RuntimeException("Does not have this resource"),
+            gameResult.countOfRightAnswers
+        )
+    }
+
+    private fun setRequiredAnswers(): String {
+
+        return String.format(
+            context?.resources?.getString(R.string.required_score)
+                ?: throw RuntimeException("Does not have this resource"),
+            gameResult.gameSettings.minCountOfRightAnswers.toString()
+        )
     }
 
     private fun parseArgs() {
