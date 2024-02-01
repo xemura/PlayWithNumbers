@@ -10,16 +10,10 @@ import com.xenia.playwithnumbers.databinding.FragmentWelcomeBinding
 
 
 class WelcomeFragment : Fragment() {
-    private var param1: String? = null
-    private var param2: String? = null
 
     private var _binding: FragmentWelcomeBinding? = null
     private val binding: FragmentWelcomeBinding
         get() = _binding ?: throw RuntimeException("FragmentWelcomeBinding == null")
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
